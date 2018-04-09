@@ -1,6 +1,11 @@
 import boto3
 import time
+import datetime
+import os
 
+def output(t):
+    print(t)
+    log.write(t+"\r")
 
 def deleteOldSnapshots(snapshots):
     limit = 1
@@ -9,18 +14,20 @@ def deleteOldSnapshots(snapshots):
 
     for s in snapshots:
         snaps.append({'id': s.id, 'start_time': s.start_time})
-        print("           "+s.id + " - " + s.start_time.strftime("%d-%m-%Y %H:%M"))
+        output("           "+s.id + " - " +
+               s.start_time.strftime("%d-%m-%Y %H:%M"))
         
     snaps = sorted(snaps, key=lambda k: k['start_time'], reverse = True)
      
     total = len(snaps)
 
     if(total > limit):
-        print("           Hay que borrar " + str(total-limit))
+        output("           Hay que borrar " + str(total-limit))
         for s in snaps[limit:total]:
-            print("                      "+s['id'] + " - " + s['start_time'].strftime("%d-%m-%Y %H:%M"))
+            output("                      " +
+                   s['id'] + " - " + s['start_time'].strftime("%d-%m-%Y %H:%M"))
     else:
-        print("           Nada que eliminar")
+        output("           Nada que eliminar")
 
 
 def getSnapshotOfVolume(instance_id):
@@ -30,6 +37,10 @@ def getSnapshotOfVolume(instance_id):
 servers = ["SRV_CITRIX01", "SRV_CITRIX02", "SRV_CITRIX03", "SRV_CITRIX04" ]
 
 ec2 = boto3.resource('ec2')
+
+if not(os.path.exists('logs')):
+    os.makedirs('logs')
+log = open('logs/aws_' + datetime.datetime.now().strftime("% d-%m-%Y % H: % M"), 'w')
 #instance = ec2.Instance('i-008e0533073e4e73a')
 
 instances = ec2.instances.all()
@@ -38,11 +49,14 @@ for i in instances:
     #print(i.id + " - "+ i.tags[0]['Value'] +" - " + i.state['Name'])
     name = i.tags[0] ['Value']
     if(name in servers):
-        print(name + " - " + i.state['Name'] + " - ")
+        output(name + " - " + i.state['Name'] + " - ")
         for v in i.volumes.all():
-            print("           Volumen ------------> "+v.id)
-            print("           Total de Snaps: " + str(sum(1 for _ in v.snapshots.all())))
+            output("           Volumen ------------> "+v.id)
+            output("           Total de Snaps: " +
+                   str(sum(1 for _ in v.snapshots.all())))
             deleteOldSnapshots(v.snapshots.all())
+        print("Esperando ...")
+        time.sleep(5)
 
 
 

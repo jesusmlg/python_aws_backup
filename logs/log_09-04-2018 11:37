@@ -1,0 +1,24 @@
+SRV_CITRIX04 - running - 
+SRV_CITRIX04 - running           Volumen ------------> vol-09ca67c86d8db6372
+           Total de Snaps: 1
+           snap-066164bbe72632a40 - 23-03-2018 22:10
+           Nada que eliminar
+SRV_CITRIX02 - running - 
+SRV_CITRIX02 - running           Volumen ------------> vol-08ca7f43ae64ca5a8
+           Total de Snaps: 3
+           snap-06230e9db089860b6 - 05-04-2018 15:53
+           snap-0ce6434707085f5fe - 05-04-2018 14:05
+           snap-040d2c580479ae371 - 30-03-2018 00:52
+           Hay que borrar 2
+                      snap-0ce6434707085f5fe - 05-04-2018 14:05
+                      snap-040d2c580479ae371 - 30-03-2018 00:52
+SRV_CITRIX03 - running - 
+SRV_CITRIX03 - running           Volumen ------------> vol-00d7521f335283555
+           Total de Snaps: 1
+           snap-01f7c53fdc8a32146 - 23-03-2018 22:38
+           Nada que eliminar
+SRV_CITRIX01 - running - 
+SRV_CITRIX01 - running           Volumen ------------> vol-0e13a8efa3ce1ae08
+           Total de Snaps: 1
+           snap-07c4e28083f0f05ab - 30-03-2018 00:52
+           Nada que eliminar
