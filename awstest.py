@@ -3,60 +3,78 @@ import time
 import datetime
 import os
 
+if not(os.path.exists('logs')):
+    os.makedirs('logs')
+log = open('logs/aws_backup_' + datetime.datetime.now().strftime("%d-%m-%Y %H:%M"), 'w')
+
 def output(t):
     print(t)
-    log.write(t+"\r")
+    log.write(t+"\r\n")
 
 def deleteOldSnapshots(snapshots):
-    limit = 1
+    limit = 7
     total = 0
     snaps = []
 
     for s in snapshots:
         snaps.append({'id': s.id, 'start_time': s.start_time})
-        output("           "+s.id + " - " +
-               s.start_time.strftime("%d-%m-%Y %H:%M"))
+        output("\t"+s.id + " - " + s.start_time.strftime("%d-%m-%Y %H:%M"))
         
-    snaps = sorted(snaps, key=lambda k: k['start_time'], reverse = True)
-     
+    snaps = sorted(snaps, key=lambda k: k['start_time'], reverse = False)
+
     total = len(snaps)
 
     if(total > limit):
-        output("           Hay que borrar " + str(total-limit))
-        for s in snaps[limit:total]:
-            output("                      " +
-                   s['id'] + " - " + s['start_time'].strftime("%d-%m-%Y %H:%M"))
+        output("\tHay que borrar " + str(total-limit))
+        for s in snaps[limit:total]:            
+            output("\t\tSnapshot: " + s['id'] + " - " + s['start_time'].strftime("%d-%m-%Y %H:%M"))
+            amis = ec2.images.filter(Filters=[{'Name': 'block-device-mapping.snapshot-id', 'Values': [s['id']]}]).limit(1)
+            #print(str(amis))
+            for ami in amis:
+                output("\t\tAmi: " + ami.id + " - " + ami.creation_date)
+                #ami.deregister()
+                output("\t\tEsperando para eliminar snap")
+                time.sleep(15)                
+                #ec2.Snapshot(s['id']).delete()
+            # output("\t\t" + res)
     else:
-        output("           Nada que eliminar")
+        output("\tNada que eliminar")
 
 
-def getSnapshotOfVolume(instance_id):
-    volume = ec2.volumes.filter()
-
-
-servers = ["SRV_CITRIX01", "SRV_CITRIX02", "SRV_CITRIX03", "SRV_CITRIX04" ]
+output("---------COMIENZO - " + datetime.datetime.now().strftime("%d-%m-%Y %H:%M")+"---------")
+servers = ["NODO1", "SRV_CITRIX01", "SRV_CITRIX02", "SRV_CITRIX03", "SRV_CITRIX04",
+           "SRV_CITRIX05", "SRV_CITRIX06", "SRV_CITRIX07", "SRV_CITRIX08", "SRV_CITRIX09", "SRV_PERFILES", "FTP", "DCAWS", "META4"]
+#servers = ["SRV_CITRIX02"]
 
 ec2 = boto3.resource('ec2')
 
-if not(os.path.exists('logs')):
-    os.makedirs('logs')
-log = open('logs/aws_' + datetime.datetime.now().strftime("% d-%m-%Y % H: % M"), 'w')
-#instance = ec2.Instance('i-008e0533073e4e73a')
 
 instances = ec2.instances.all()
 
-for i in instances:
-    #print(i.id + " - "+ i.tags[0]['Value'] +" - " + i.state['Name'])
-    name = i.tags[0] ['Value']
-    if(name in servers):
-        output(name + " - " + i.state['Name'] + " - ")
+for i in instances:    
+    instanceName = i.tags[0] ['Value']
+    if(instanceName in servers):
+        output(instanceName + " - " + i.state['Name'] + " - ")
         for v in i.volumes.all():
-            output("           Volumen ------------> "+v.id)
-            output("           Total de Snaps: " +
-                   str(sum(1 for _ in v.snapshots.all())))
+            #Creamos la imagen para la copia de seguridad
+            fecha = datetime.datetime.now().strftime("%d-%m-%Y_%H-%M")
+            description = "Copia de seguridad de la maquina " + instanceName + " del dia " + fecha
+            backupName = instanceName + "_BAK_" + fecha
+
+            output("\tCreando imagen ...")
+            image = i.create_image(Description= description, NoReboot=True, Name= backupName, DryRun=False)
+            image.wait_until_exists()
+            time.sleep(2)
+            output("\tVolumen ------------> "+v.id)
+            output("\tTotal de Snaps: " + str(sum(1 for _ in v.snapshots.all())))
+            output("\tTotal AMIs: " + str(sum(1 for _ in ec2.images.filter(Filters= [{ 'Name': 'name' , 'Values':[ '*'+instanceName+'*']}]))))
+            #Borramos la/s ami/s antigua/s
             deleteOldSnapshots(v.snapshots.all())
         print("Esperando ...")
-        time.sleep(5)
+        #getAMI()
+        time.sleep(120)
+
+output("---------FIN---------")
 
 
 
