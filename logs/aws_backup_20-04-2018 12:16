@@ -1,0 +1,17 @@
+--------- COMIENZO - 20-04-2018 12:16---------
+SRV_CITRIX02 - running - 
+	Creando imagen ...
+	Volumen ------------> vol-08ca7f43ae64ca5a8
+	Total de Snaps: 3
+	Total AMIs: 3
+	snap-0082578e03bd76285 - 20-04-2018 10:16
+	snap-0dd9c30b7b14dcc6f - 20-04-2018 01:28
+	snap-040d2c580479ae371 - 30-03-2018 00:52
+	Hay que borrar 2
+		Snapshot: snap-0dd9c30b7b14dcc6f - 20-04-2018 01:28
+		Ami: ami-25c0e05c - 2018-04-20T01:28:52.000Z
+		Esperando para eliminar snap
+		Snapshot: snap-040d2c580479ae371 - 30-03-2018 00:52
+		Ami: ami-59bfed20 - 2018-03-30T00:52:17.000Z
+		Esperando para eliminar snap
+--------- FIN -  20-04-2018 12:17---------
